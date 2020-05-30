@@ -18,12 +18,14 @@
 cmake_minimum_required(VERSION 2.8.10)
 project(brpc C CXX)
 
+SET(CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR}/installed)
+
 option(WITH_GLOG "With glog" OFF)
 option(WITH_MESALINK "With MesaLink" OFF)
-option(DEBUG "Print debug logs" OFF)
+option(DEBUG "Print debug logs" ON)
 option(WITH_DEBUG_SYMBOLS "With debug symbols" ON)
 option(WITH_THRIFT "With thrift framed protocol supported" OFF)
-option(BUILD_UNIT_TESTS "Whether to build unit tests" OFF)
+option(BUILD_UNIT_TESTS "Whether to build unit tests" ON)
 option(DOWNLOAD_GTEST "Download and build a fresh copy of googletest. Requires Internet access." ON)
 
 # Enable MACOSX_RPATH. Run "cmake --help-policy CMP0042" for policy details.
@@ -428,7 +430,7 @@ set(SOURCES
     ${BRPC_SOURCES}
     ${THRIFT_SOURCES}
     )
-
+message(${BUILD_UNIT_TESTS})
 add_subdirectory(src)
 if(BUILD_UNIT_TESTS)
     enable_testing()

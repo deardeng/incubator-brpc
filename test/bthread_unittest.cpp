@@ -20,7 +20,6 @@
 #include "butil/time.h"
 #include "butil/macros.h"
 #include "butil/logging.h"
-#include "butil/logging.h"
 #include "butil/gperftools_profiler.h"
 #include "bthread/bthread.h"
 #include "bthread/unstable.h"
@@ -71,24 +70,35 @@ bthread_fcontext_t fc;
 typedef std::pair<int,int> pair_t;
 static void f(intptr_t param) {
     pair_t* p = (pair_t*)param;
+    LOG(INFO) << "bthread in fcontext fc : " << p->first << " : " << p->second ;
     p = (pair_t*)bthread_jump_fcontext(&fc, fcm, (intptr_t)(p->first+p->second));
+    LOG(INFO) << "bthread back from fcm to fc " << p->first << " : " << p->second;
     bthread_jump_fcontext(&fc, fcm, (intptr_t)(p->first+p->second));
+    LOG(INFO) << "fcm end so back to fc";
 }
 
 TEST_F(BthreadTest, context_sanity) {
     fcm = NULL;
     std::size_t size(8192);
     void* sp = malloc(size);
+    LOG(INFO) << "context sanity main" << std::endl;
 
     pair_t p(std::make_pair(2, 7));
     fc = bthread_make_fcontext((char*)sp + size, size, f);
+    LOG(INFO) << "bthread make fcontext fc" << std::endl;
 
     int res = (int)bthread_jump_fcontext(&fcm, fc, (intptr_t)&p);
-    std::cout << p.first << " + " << p.second << " == " << res << std::endl;
+    LOG(INFO) << "bthread jump back from fc to fcm" << std::endl;
+
+    LOG(INFO) << p.first << " + " << p.second << " == " << res << std::endl;
 
     p = std::make_pair(5, 6);
+    LOG(INFO) << "bthread jump from fcm to fc" << std::endl;
     res = (int)bthread_jump_fcontext(&fcm, fc, (intptr_t)&p);
-    std::cout << p.first << " + " << p.second << " == " << res << std::endl;
+    LOG(INFO) << "back fcm." << std::endl;
+    LOG(INFO) << p.first << " + " << p.second << " == " << res << std::endl;
+    bthread_jump_fcontext(&fcm, fc, (intptr_t)&p);
+    LOG(INFO) << "fcm end back to fc?" << std::endl;
 }
 
 TEST_F(BthreadTest, call_bthread_functions_before_tls_created) {
